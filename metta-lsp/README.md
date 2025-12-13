@@ -2,7 +2,15 @@
 
 A complete Language Server implementation for the **MeTTa** programming language, built with **Node.js**, **vscode-languageserver**, and **Tree-sitter** grammar support.
 
+## Table of Contents
 
+1. [Features](#features)
+2. [Project Structure](#project-structure)
+3. [Prerequisites](#prerequisites)
+4. [Installation & Setup](#installation--setup)
+5. [Building the Project](#building-the-project)
+6. [Testing Locally](#testing-locally)
+7. [Architecture Overview](#architecture-overview)
 ---
 
 ## Features
@@ -10,18 +18,27 @@ A complete Language Server implementation for the **MeTTa** programming language
 ### Core LSP Features
 
 **Syntax Highlighting** - TextMate grammar + Tree-sitter semantic awareness
+
 **Diagnostics** - Real-time syntax error detection and unmatched paren warnings
+
 **Hover Information** - Symbol type and location hover tooltips
+
 **Go to Definition** - Jump to symbol definitions
+
 **Auto-Completion** - Context-aware completions for keywords and built-in functions
+
 **Document Symbols** - Outline view with function and variable definitions
+
 **Workspace Symbols** - Search symbols across all open files
 
 ### Advanced Features (Included)
 
 **Semantic Tokens** - Color code tokens by type (keywords, functions, variables)
+
 **Folding Ranges** - Collapse/expand list structures
+
 **Rename Symbols** - Rename definitions with cross-reference updates
+
 **Incremental Parsing** - Efficient document updates via Tree-sitter caching
 
 ---
