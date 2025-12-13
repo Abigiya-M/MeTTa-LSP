@@ -1,0 +1,3 @@
+[submodule "tree-sitter-metta"]
+	path = tree-sitter-metta
+	url = https://github.com/rTreutlein/tree-sitter-metta
