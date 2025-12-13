@@ -1,0 +1,31 @@
+{
+  "name": "metta-lsp-server",
+  "version": "0.1.0",
+  "description": "Language Server for MeTTa",
+  "author": "",
+  "license": "MIT",
+  "main": "out/server.js",
+  "types": "out/server.d.ts",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "test": "node --test out/**/*.test.js",
+    "lint": "eslint src/**/*.ts"
+  },
+  "dependencies": {
+    "tree-sitter": "^0.25.0",
+    "vscode-languageserver": "^9.0.1",
+    "vscode-languageserver-textdocument": "^1.0.12",
+    "vscode-uri": "^3.0.7"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
+    "typescript": "^5.0.0"
+  }
+}
