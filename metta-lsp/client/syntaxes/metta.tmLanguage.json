@@ -1,0 +1,70 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "MeTTa",
+  "scopeName": "source.metta",
+  "patterns": [
+    {
+      "name": "comment.line.metta",
+      "match": ";[^\n\r]*",
+      "comment": "Line comment"
+    },
+    {
+      "name": "string.quoted.double.metta",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        {
+          "name": "constant.character.escape.metta",
+          "match": "\\\\."
+        }
+      ]
+    },
+    {
+      "name": "constant.numeric.metta",
+      "match": "(-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?)|(-?\\d+\\.\\d*)"
+    },
+    {
+      "name": "variable.other.metta",
+      "match": "\\$[^()\\s\";]+"
+    },
+    {
+      "name": "keyword.control.metta",
+      "match": "\\b(defun|let|if|lambda|match|quote|quasiquote|unquote|cond|case|and|or|not)\\b"
+    },
+    {
+      "name": "support.function.metta",
+      "match": "\\b(=|<|>|<=|>=|\\+|-|\\*|/|%|append|length|cons|car|cdr|null\\?|atom\\?|number\\?|string\\?|symbol\\?)\\b"
+    },
+    {
+      "name": "punctuation.definition.list.begin.metta",
+      "match": "\\("
+    },
+    {
+      "name": "punctuation.definition.list.end.metta",
+      "match": "\\)"
+    },
+    {
+      "name": "constant.character.metta",
+      "match": "#\\\\[a-zA-Z]+"
+    },
+    {
+      "name": "constant.language.boolean.metta",
+      "match": "\\b(true|false|nil|null)\\b"
+    },
+    {
+      "name": "entity.name.function.metta",
+      "match": "[a-zA-Z_][a-zA-Z0-9_-]*(?=\\s*[()\\)])",
+      "comment": "Function name followed by whitespace and paren"
+    }
+  ],
+  "repository": {
+    "quoted": {
+      "patterns": [
+        {
+          "name": "punctuation.definition.quote.metta",
+          "match": "'"
+        }
+      ]
+    }
+  }
+}
