@@ -2,19 +2,6 @@
 
 A complete Language Server implementation for the **MeTTa** programming language, built with **Node.js**, **vscode-languageserver**, and **Tree-sitter** grammar support.
 
-## Table of Contents
-
-1. [Features](#features)
-2. [Project Structure](#project-structure)
-3. [Prerequisites](#prerequisites)
-4. [Installation & Setup](#installation--setup)
-5. [Building the Project](#building-the-project)
-6. [Testing Locally](#testing-locally)
-7. [Publishing to VS Code Marketplace](#publishing-to-vs-code-marketplace)
-8. [Architecture Overview](#architecture-overview)
-9. [Advanced Features](#advanced-features)
-10. [Best Practices](#best-practices)
-11. [Troubleshooting](#troubleshooting)
 
 ---
 
