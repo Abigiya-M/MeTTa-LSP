@@ -1,0 +1,28 @@
+{
+  "name": "metta-lsp-monorepo",
+  "version": "0.1.0",
+  "description": "Language Server Protocol for MeTTa",
+  "author": "",
+  "license": "MIT",
+  "private": true,
+  "workspaces": [
+    "client",
+    "server",
+    "packages/*"
+  ],
+  "scripts": {
+    "install-all": "npm install && npm --workspace=client install && npm --workspace=server install",
+    "build": "npm --workspace=client run build && npm --workspace=server run build",
+    "watch": "npm --workspace=server run watch & npm --workspace=client run watch",
+    "test": "npm --workspace=server run test",
+    "lint": "eslint \"**/*.ts\" --ignore-pattern node_modules",
+    "clean": "rm -rf client/out server/out client/node_modules server/node_modules && npm cache clean --force"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "typescript": "^5.0.0",
+    "eslint": "^8.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0"
+  }
+}
