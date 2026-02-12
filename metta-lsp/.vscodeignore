@@ -1,0 +1,57 @@
+# ── Source & dev files ──────────────────────────────────────────
+**/*.ts
+!**/*.d.ts
+**/tsconfig.json
+.eslintrc*
+webpack.config.js
+
+# ── Dev / repo artifacts ───────────────────────────────────────
+.vscode/
+.vscode-test/
+.git/
+.gitignore
+.gitmodules
+.editorconfig
+docs/
+test-fixtures/
+**/*.vsix
+dist/
+
+# ── Tarball (only needed at npm-install time) ──────────────────
+tree-sitter-metta-0.1.0.tgz
+
+# ── Root node_modules (nothing needed from root) ───────────────
+node_modules/
+
+# ── Client: include only production deps ───────────────────────
+client/node_modules/**
+!client/node_modules/vscode-languageclient/**
+!client/node_modules/vscode-jsonrpc/**
+!client/node_modules/vscode-languageserver-protocol/**
+!client/node_modules/vscode-languageserver-types/**
+!client/node_modules/minimatch/**
+!client/node_modules/brace-expansion/**
+!client/node_modules/balanced-match/**
+!client/node_modules/semver/**
+client/package-lock.json
+
+# ── Server: include only production deps ───────────────────────
+server/node_modules/**
+!server/node_modules/tree-sitter/**
+!server/node_modules/tree-sitter-metta/**
+!server/node_modules/node-addon-api/**
+!server/node_modules/node-gyp-build/**
+!server/node_modules/vscode-jsonrpc/**
+!server/node_modules/vscode-languageserver/**
+!server/node_modules/vscode-languageserver-protocol/**
+!server/node_modules/vscode-languageserver-textdocument/**
+!server/node_modules/vscode-languageserver-types/**
+!server/node_modules/vscode-uri/**
+server/package-lock.json
+
+# ── Trim tree-sitter-metta inside server/node_modules ──────────
+server/node_modules/tree-sitter-metta/src/**
+server/node_modules/tree-sitter-metta/queries/**
+server/node_modules/tree-sitter-metta/grammar.js
+server/node_modules/tree-sitter-metta/binding.gyp
+server/node_modules/tree-sitter-metta/build/Release/obj.target/**
