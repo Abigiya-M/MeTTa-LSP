@@ -1,25 +1,82 @@
 {
-  "name": "metta-lsp-monorepo",
+  "name": "metta-lsp",
+  "displayName": "MeTTa Language Support",
   "version": "0.1.0",
-  "description": "Language Server Protocol for MeTTa",
+  "description": "Language Server Protocol support for the MeTTa programming language — diagnostics, completions, hover, go-to-definition, and more.",
+  "publisher": "metta-lang",
   "author": "",
   "license": "MIT",
-  "private": true,
-  "workspaces": [
-    "client",
-    "server",
-    "packages/*"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/metta-lang/metta-lsp"
+  },
+  "categories": [
+    "Programming Languages",
+    "Linters"
   ],
+  "engines": {
+    "vscode": "^1.75.0",
+    "node": ">=18.0.0"
+  },
+  "main": "client/out/extension.js",
+  "activationEvents": [
+    "onLanguage:metta"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "metta",
+        "aliases": ["MeTTa", "metta"],
+        "extensions": [".metta"],
+        "configuration": "./client/language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "metta",
+        "scopeName": "source.metta",
+        "path": "./client/syntaxes/metta.tmLanguage.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "metta.restartServer",
+        "title": "Restart MeTTa Language Server",
+        "category": "MeTTa"
+      }
+    ],
+    "configuration": {
+      "title": "MeTTa Language Server",
+      "properties": {
+        "metta.server.debug": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable debug logging for the language server"
+        },
+        "metta.server.trace": {
+          "type": "string",
+          "enum": ["off", "messages", "verbose"],
+          "default": "off",
+          "description": "Trace level for language server communication"
+        }
+      }
+    }
+  },
+  "private": true,
   "scripts": {
-    "install-all": "npm install && npm --workspace=client install && npm --workspace=server install",
-    "build": "npm --workspace=client run build && npm --workspace=server run build",
-    "watch": "npm --workspace=server run watch & npm --workspace=client run watch",
-    "test": "npm --workspace=server run test",
+    "vscode:prepublish": "npm run build",
+    "postinstall": "cd client && npm install --include=dev && cd ../server && npm install --include=dev",
+    "build": "cd server && npm run build && cd ../client && npm run build",
+    "watch": "cd server && npm run watch & cd client && npm run watch",
+    "test": "cd server && npm test",
     "lint": "eslint \"**/*.ts\" --ignore-pattern node_modules",
-    "clean": "rm -rf client/out server/out client/node_modules server/node_modules && npm cache clean --force"
+    "clean": "rm -rf client/out server/out client/node_modules server/node_modules",
+    "package": "vsce package",
+    "publish": "vsce publish"
   },
   "devDependencies": {
     "@types/node": "^18.0.0",
+    "@vscode/vsce": "^2.15.0",
     "typescript": "^5.0.0",
     "eslint": "^8.0.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
