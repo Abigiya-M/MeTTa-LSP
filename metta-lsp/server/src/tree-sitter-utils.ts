@@ -1,267 +1,13 @@
 /**
  * Tree-Sitter Utilities for MeTTa Language Analysis
- * Provides AST-based parsing and analysis capabilities
+ * Provides AST-based symbol extraction and analysis using Tree-sitter parse trees.
+ *
+ * All functions accept a Tree-sitter Tree (obtained via the document cache)
+ * so that the same parse tree is reused across diagnostics, completions,
+ * hover, go-to-definition, and document symbols.
  */
 
-/**
- * Extract function definitions from source code
- * Matches patterns like: (defn name ...) (define name ...) (defun name ...)
- */
-export function extractFunctionDefs(text: string): FunctionDef[] {
-  const functions: FunctionDef[] = [];
-  
-  // Pattern: (def... name args...)
-  const defRegex = /\((def[a-z]*|defn|defun|define)\s+(\w[\w\-]*)/g;
-  let match;
-
-  while ((match = defRegex.exec(text)) !== null) {
-    const name = match[2];
-    const position = text.substring(0, match.index).split('\n').length - 1;
-    // Calculate column position of the function name, not the opening paren
-    const nameStartIndex = match.index + match[0].indexOf(name);
-    
-    functions.push({
-      name,
-      type: 'function',
-      line: position,
-      column: nameStartIndex - text.substring(0, nameStartIndex).lastIndexOf('\n') - 1,
-    });
-  }
-
-  return functions;
-}
-
-/**
- * Find all variable definitions in let bindings
- */
-export function extractVariables(text: string): Variable[] {
-  const variables: Variable[] = [];
-  
-  // Pattern: (let ((var val) ...))
-  const letRegex = /\(\s*let\*?\s*\(\s*\((\w[\w\-]*)/g;
-  let match;
-
-  while ((match = letRegex.exec(text)) !== null) {
-    const name = match[1];
-    const position = text.substring(0, match.index).split('\n').length - 1;
-    const nameStartIndex = match.index + match[0].indexOf(name);
-    
-    variables.push({
-      name,
-      type: 'variable',
-      line: position,
-      column: nameStartIndex - text.substring(0, nameStartIndex).lastIndexOf('\n') - 1,
-    });
-  }
-
-  return variables;
-}
-
-/**
- * Find all quoted symbols (starting with $)
- */
-export function extractQuotedSymbols(text: string): Variable[] {
-  const symbols: Variable[] = [];
-  
-  const varRegex = /\$(\w[\w\-]*)/g;
-  let match;
-
-  while ((match = varRegex.exec(text)) !== null) {
-    const name = match[1];
-    const position = text.substring(0, match.index).split('\n').length - 1;
-    
-    symbols.push({
-      name,
-      type: 'variable',
-      line: position,
-      column: match.index,
-    });
-  }
-
-  return symbols;
-}
-
-/**
- * Analyze scope and find undefined references
- */
-export function analyzeScope(text: string): ScopeAnalysis {
-  const functions = extractFunctionDefs(text);
-  const variables = extractVariables(text);
-  const symbols = extractQuotedSymbols(text);
-  
-  // Combine all definitions
-  const defined: Definition[] = [];
-  defined.push(...functions);
-  defined.push(...variables);
-  defined.push(...symbols);
-
-  // Find potential undefined references
-  const allDefined = new Set([
-    ...functions.map((f) => f.name),
-    ...variables.map((v) => v.name),
-    ...symbols.map((s) => s.name),
-  ]);
-
-  // Extract all identifiers used in the code
-  const usageRegex = /\b([a-zA-Z_\-][\w\-]*)\b/g;
-  const used = new Set<string>();
-  
-  let match;
-  while ((match = usageRegex.exec(text)) !== null) {
-    const identifier = match[1];
-    // Skip keywords and built-ins
-    if (!isKeyword(identifier) && !isBuiltin(identifier)) {
-      used.add(identifier);
-    }
-  }
-
-  const undefined = Array.from(used).filter((u) => !allDefined.has(u));
-
-  return {
-    defined,
-    undefined,
-  };
-}
-
-/**
- * Extract all list heads (potential function calls)
- */
-export function extractListHeads(text: string): ListHead[] {
-  const heads: ListHead[] = [];
-  
-  // Pattern: (symbol ...
-  const headRegex = /\(\s*(\w[\w\-]*)/g;
-  let match;
-
-  while ((match = headRegex.exec(text)) !== null) {
-    const name = match[1];
-    const position = text.substring(0, match.index).split('\n').length - 1;
-    
-    heads.push({
-      name,
-      line: position,
-      column: match.index,
-    });
-  }
-
-  return heads;
-}
-
-/**
- * Check if text is a MeTTa keyword
- */
-function isKeyword(text: string): boolean {
-  const keywords = [
-    'defn', 'defun', 'define', 'def',
-    'match', 'case',
-    'if', 'then', 'else',
-    'let', 'let*', 'in',
-    'lambda', 'fn', 'quote',
-    'eval', 'apply',
-    'atom', 'type', 'module',
-    'import', 'export',
-  ];
-  return keywords.includes(text.toLowerCase());
-}
-
-/**
- * Check if text is a built-in function
- */
-function isBuiltin(text: string): boolean {
-  const builtins = [
-    '+', '-', '*', '/', '=', '==', '!=', '<', '>', '<=', '>=',
-    'car', 'cdr', 'cons', 'list', 'append', 'length',
-    'not', 'and', 'or',
-    'null?', 'number?', 'symbol?', 'list?',
-    'print', 'display', 'newline',
-  ];
-  return builtins.includes(text.toLowerCase());
-}
-
-/**
- * Detect potential errors in the code
- */
-export function detectErrors(text: string): ParseError[] {
-  const errors: ParseError[] = [];
-  const lines = text.split('\n');
-
-  let parenDepth = 0;
-  let bracketDepth = 0;
-  let braceDepth = 0;
-
-  lines.forEach((line, lineIndex) => {
-    for (let i = 0; i < line.length; i++) {
-      const char = line[i];
-
-      if (char === '(') parenDepth++;
-      else if (char === ')') {
-        parenDepth--;
-        if (parenDepth < 0) {
-          errors.push({
-            type: 'error',
-            message: 'Unmatched closing parenthesis',
-            line: lineIndex,
-            column: i,
-          });
-          parenDepth = 0;
-        }
-      } else if (char === '[') bracketDepth++;
-      else if (char === ']') {
-        bracketDepth--;
-        if (bracketDepth < 0) {
-          errors.push({
-            type: 'error',
-            message: 'Unmatched closing bracket',
-            line: lineIndex,
-            column: i,
-          });
-          bracketDepth = 0;
-        }
-      } else if (char === '{') braceDepth++;
-      else if (char === '}') {
-        braceDepth--;
-        if (braceDepth < 0) {
-          errors.push({
-            type: 'error',
-            message: 'Unmatched closing brace',
-            line: lineIndex,
-            column: i,
-          });
-          braceDepth = 0;
-        }
-      }
-    }
-  });
-
-  if (parenDepth > 0) {
-    errors.push({
-      type: 'error',
-      message: `${parenDepth} unclosed parenthesis(es)`,
-      line: lines.length - 1,
-      column: lines[lines.length - 1]?.length || 0,
-    });
-  }
-
-  if (bracketDepth > 0) {
-    errors.push({
-      type: 'error',
-      message: `${bracketDepth} unclosed bracket(s)`,
-      line: lines.length - 1,
-      column: lines[lines.length - 1]?.length || 0,
-    });
-  }
-
-  if (braceDepth > 0) {
-    errors.push({
-      type: 'error',
-      message: `${braceDepth} unclosed brace(s)`,
-      line: lines.length - 1,
-      column: lines[lines.length - 1]?.length || 0,
-    });
-  }
-
-  return errors;
-}
+import { SyntaxNode, Tree } from 'tree-sitter';
 
 // ============================================================================
 // Type Definitions
@@ -283,20 +29,146 @@ export interface Variable {
 
 export type Definition = FunctionDef | Variable;
 
-export interface ListHead {
-  name: string;
-  line: number;
-  column: number;
+// ============================================================================
+// AST-based extraction helpers
+// ============================================================================
+
+/** Definition keywords that introduce a named binding */
+const DEF_KEYWORDS = new Set(['defn', 'defun', 'define', 'def']);
+
+/** Let-form keywords that introduce variable bindings */
+const LET_KEYWORDS = new Set(['let', 'let*']);
+
+/**
+ * Extract function/definition names from the AST.
+ *
+ * Walks every `list` node and checks whether its `head` field is a
+ * definition keyword.  If so, the first argument is the defined name.
+ */
+export function extractFunctionDefs(tree: Tree): FunctionDef[] {
+  const functions: FunctionDef[] = [];
+  const lists = tree.rootNode.descendantsOfType('list');
+
+  for (const list of lists) {
+    const head = list.childForFieldName('head');
+    if (!head) continue;
+
+    const headText = head.type === 'symbol' ? head.text : resolveSymbolText(head);
+    if (!headText || !DEF_KEYWORDS.has(headText)) continue;
+
+    // The name is the first argument after the head
+    const args = list.childrenForFieldName('argument');
+    if (args.length === 0) continue;
+
+    const nameNode = args[0];
+    const name = resolveSymbolText(nameNode);
+    if (!name) continue;
+
+    functions.push({
+      name,
+      type: 'function',
+      line: nameNode.startPosition.row,
+      column: nameNode.startPosition.column,
+    });
+  }
+
+  return functions;
 }
 
-export interface ScopeAnalysis {
-  defined: Definition[];
-  undefined: string[];
+/**
+ * Extract variable bindings from let/let* forms.
+ *
+ * Pattern: (let ((var val) ...) body)
+ *          (let* ((var val) ...) body)
+ */
+export function extractVariables(tree: Tree): Variable[] {
+  const variables: Variable[] = [];
+  const lists = tree.rootNode.descendantsOfType('list');
+
+  for (const list of lists) {
+    const head = list.childForFieldName('head');
+    if (!head) continue;
+
+    const headText = head.type === 'symbol' ? head.text : resolveSymbolText(head);
+    if (!headText || !LET_KEYWORDS.has(headText)) continue;
+
+    const args = list.childrenForFieldName('argument');
+    if (args.length === 0) continue;
+
+    // First argument should be the bindings list: ((var val) ...)
+    const bindingsList = args[0];
+    if (bindingsList.type !== 'list') continue;
+
+    for (const binding of bindingsList.namedChildren) {
+      if (binding.type !== 'list') continue;
+      const varHead = binding.childForFieldName('head');
+      if (!varHead) continue;
+      const name = resolveSymbolText(varHead);
+      if (!name) continue;
+
+      variables.push({
+        name,
+        type: 'variable',
+        line: varHead.startPosition.row,
+        column: varHead.startPosition.column,
+      });
+    }
+  }
+
+  return variables;
 }
 
-export interface ParseError {
-  type: 'error' | 'warning';
-  message: string;
-  line: number;
-  column: number;
+/**
+ * Extract $-prefixed variable references from the AST.
+ */
+export function extractDollarVariables(tree: Tree): Variable[] {
+  const variables: Variable[] = [];
+  const varNodes = tree.rootNode.descendantsOfType('variable');
+
+  for (const node of varNodes) {
+    variables.push({
+      name: node.text,
+      type: 'variable',
+      line: node.startPosition.row,
+      column: node.startPosition.column,
+    });
+  }
+
+  return variables;
+}
+
+/**
+ * Compute folding ranges from the AST.
+ * Returns multi-line list nodes as foldable regions.
+ */
+export function computeFoldingRanges(tree: Tree): { startLine: number; endLine: number }[] {
+  const ranges: { startLine: number; endLine: number }[] = [];
+  const lists = tree.rootNode.descendantsOfType('list');
+
+  for (const list of lists) {
+    const startLine = list.startPosition.row;
+    const endLine = list.endPosition.row;
+    if (endLine - startLine > 1) {
+      ranges.push({ startLine, endLine });
+    }
+  }
+
+  return ranges;
+}
+
+// ============================================================================
+// Internal helpers
+// ============================================================================
+
+/**
+ * Resolve the text of a node that is expected to be a symbol.
+ * Handles both raw `symbol` nodes and `atom` nodes wrapping a symbol.
+ */
+function resolveSymbolText(node: SyntaxNode): string | null {
+  if (node.type === 'symbol') return node.text;
+  if (node.type === 'atom') {
+    const child = node.namedChildren.find((c) => c.type === 'symbol');
+    return child ? child.text : null;
+  }
+  return null;
 }
