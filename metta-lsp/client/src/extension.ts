@@ -1,5 +1,4 @@
 import * as path from 'path';
-import * as fs from 'fs';
 import { ExtensionContext, commands, window } from 'vscode';
 import {
   LanguageClient,
@@ -11,7 +10,8 @@ import {
 let client: LanguageClient;
 
 export async function activate(context: ExtensionContext) {
-  const serverModule = context.asAbsolutePath(path.join('..', 'server', 'out', 'server.js'));
+  // In the packaged extension the root is metta-lsp/, so server/out/ is at the root level
+  const serverModule = context.asAbsolutePath(path.join('server', 'out', 'server.js'));
   const debugOptions = { execArgv: ['--nolazy', '--inspect=6009'] };
 
   const serverOptions: ServerOptions = {
