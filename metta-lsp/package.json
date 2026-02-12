@@ -3,12 +3,12 @@
   "displayName": "MeTTa Language Support",
   "version": "0.1.0",
   "description": "Language Server Protocol support for the MeTTa programming language — diagnostics, completions, hover, go-to-definition, and more.",
-  "publisher": "metta-lang",
-  "author": "",
+  "publisher": "Abigiya-M",
+  "author": "Abigiya Mulugeta",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/metta-lang/metta-lsp"
+    "url": "https://github.com/Abigiya-M/metta-lsp"
   },
   "categories": [
     "Programming Languages",
