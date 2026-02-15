@@ -1,8 +1,7 @@
 /**
  * Centralized Tree-Sitter parser instance
  * Single parser + language binding shared across the entire LSP
- * 
- * CRITICAL: Do not create parser instances elsewhere.
+ *
  * This prevents memory leaks and ensures consistent parsing behavior.
  */
 
